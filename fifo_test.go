@@ -3,6 +3,7 @@ package fifo
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"testing"
 )
 
@@ -281,24 +282,32 @@ func TestCache_Reset(t *testing.T) {
 
 var v int
 
-func BenchmarkCache_Get_1024(b *testing.B) {
-	cache := New[int, int](1024)
+func BenchmarkCache_Get(b *testing.B) {
+	const capacity = 1024
 
-	for i := 0; i < 1024*4; i++ {
+	cache := New[int, int](capacity)
+
+	for i := 0; i < capacity*4; i++ {
 		cache.Set(i, rand.Int())
 	}
 
-	for i := 0; i < b.N; i++ {
-		if value, ok := cache.Get(i); ok {
-			v = value
+	b.Run(strconv.Itoa(capacity), func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			if value, ok := cache.Get(i); ok {
+				v = value
+			}
 		}
-	}
+	})
 }
 
-func BenchmarkCache_Set_1024(b *testing.B) {
-	cache := New[int, int](1024)
+func BenchmarkCache_Set(b *testing.B) {
+	const capacity = 1024
 
-	for i := 0; i < b.N; i++ {
-		cache.Set(i, i)
-	}
+	cache := New[int, int](capacity)
+
+	b.Run(strconv.Itoa(capacity), func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			cache.Set(i, i)
+		}
+	})
 }
